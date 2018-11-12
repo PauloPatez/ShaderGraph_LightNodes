@@ -16,11 +16,8 @@ public class LambertNode : CodeFunctionNode
         return GetType().GetMethod("LambertNodeFunction",
             BindingFlags.Static | BindingFlags.NonPublic);
     }
-    public static bool isPreview;
     public override void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
     {
-        isPreview = generationMode == GenerationMode.Preview;
-
         base.GenerateNodeFunction(registry, graphContext, generationMode);
     }
     static string LambertNodeFunction(
@@ -31,21 +28,10 @@ public class LambertNode : CodeFunctionNode
     )
     {
         OutputColor = Vector3.zero;
-        
-        if (!isPreview)
-        {
-            return Shader;
-        }
-        else
-        {
-            return PreviewShader;
-        }
-        
+        return Shader;
     }
     public static string Shader = @"{
-        OutputColor = LightingLambert(AttenuatedLightColor, LightDirection, WorldNormal);
-    }";
-    public static string PreviewShader = @"{
-        OutputColor = dot(LightDirection, WorldNormal);
+        half NdotL = saturate(dot(WorldNormal, LightDirection));
+        OutputColor = AttenuatedLightColor * NdotL;
     }";
 }
