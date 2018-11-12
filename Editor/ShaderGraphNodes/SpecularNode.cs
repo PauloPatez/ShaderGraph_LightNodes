@@ -14,13 +14,10 @@ public class SpecularNode : CodeFunctionNode
     protected override MethodInfo GetFunctionToConvert()
     {
         return GetType().GetMethod("SpecularNodeFunction",
-            BindingFlags.Static | BindingFlags.NonPublic);
+        BindingFlags.Static | BindingFlags.NonPublic);
     }
-    public static bool isPreview;
     public override void GenerateNodeFunction(FunctionRegistry registry, GraphContext graphContext, GenerationMode generationMode)
     {
-        isPreview = generationMode == GenerationMode.Preview;
-
         base.GenerateNodeFunction(registry, graphContext, generationMode);
     }
     static string SpecularNodeFunction(
@@ -34,21 +31,12 @@ public class SpecularNode : CodeFunctionNode
     )
     {
         OutputColor = Vector3.zero;
-        
-        if (!isPreview)
-        {
-            return Shader;
-        }
-        else
-        {
-            return PreviewShader;
-        }
-        
+        return Shader;
     }
     public static string Shader = @"{
-        OutputColor = LightingSpecular(AttenuatedLightColor, LightDirection, WorldNormal, normalize(WorldView), Glossiness, Shininess);
-    }";
-    public static string PreviewShader = @"{
-        OutputColor = dot(LightDirection, WorldNormal);
+        half3 halfVec = SafeNormalize(LightDirection + normalize(WorldView));
+        half NdotH = saturate(dot(WorldNormal, halfVec));
+        half modifier = pow(NdotH, Shininess) * Glossiness;
+        OutputColor = AttenuatedLightColor * modifier;
     }";
 }
