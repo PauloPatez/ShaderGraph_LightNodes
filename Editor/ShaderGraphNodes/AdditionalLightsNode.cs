@@ -26,7 +26,8 @@ public class AdditionalLightsNode : CodeFunctionNode
     static string AdditionalLightsNodeFunction(
     [Slot(0, Binding.WorldSpacePosition)] Vector3 WorldPos,
     [Slot(1, Binding.WorldSpaceNormal)] Vector3 WorldNormal,
-    [Slot(2, Binding.WorldSpacePosition)] out Vector3 OutputColor
+    [Slot(2, Binding.WorldSpacePosition)] out Vector3 OutputColor,
+    [Slot(3, Binding.None, 1.0f, -0.3f, 0.4f, 1f)] Vector3 PreviewLightDirection
     )
     {
         OutputColor = Vector3.zero;
@@ -43,20 +44,16 @@ public class AdditionalLightsNode : CodeFunctionNode
         int pixelLightCount = GetAdditionalLightsCount();
         half3 diffuseColor = half3(0,0,0);
         
-        
         for (int i = 0; i < pixelLightCount; ++i)
         {
             Light light = GetAdditionalLight(i, WorldPos);
-            half3 attenuatedLightColor = light.color * (light.distanceAttenuation * light.shadowAttenuation);
-        
-            //diffuseColor += LightingLambert(attenuatedLightColor, light.direction, WorldNormal);
+            half3 attenuatedLightColor = light.color * (light.distanceAttenuation);
             diffuseColor += attenuatedLightColor;
         }
-        
         
         OutputColor = diffuseColor;
     }";
     public static string PreviewShader = @"{
-        OutputColor = half3(0, 0, 0);
+        OutputColor = saturate(dot(WorldNormal, normalize(PreviewLightDirection))) * half3(0.2, 0.2, 0.3);
     }";
 }

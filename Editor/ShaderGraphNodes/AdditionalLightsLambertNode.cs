@@ -26,10 +26,11 @@ public class AdditionalLightsLambertNode : CodeFunctionNode
     [Slot(0, Binding.WorldSpacePosition)] Vector3 WorldPos,
     [Slot(1, Binding.WorldSpaceNormal)] Vector3 WorldNormal,
     [Slot(2, Binding.WorldSpaceViewDirection)] Vector3 WorldView,
-    [Slot(3, Binding.None)] Vector1 Glossiness,
-    [Slot(4, Binding.None)] Vector1 Shininess,
+    [Slot(3, Binding.None, 4f, 0f, 0f, 0f)] Vector1 Glossiness,
+    [Slot(4, Binding.None, 40f, 0f, 0f, 0f)] Vector1 Shininess,
     [Slot(5, Binding.None)] out Vector3 DiffuseColor,
-    [Slot(6, Binding.None)] out Vector3 SpecularColor
+    [Slot(6, Binding.None)] out Vector3 SpecularColor,
+    [Slot(7, Binding.None, 1.0f, -0.3f, 0.4f, 1f)] Vector3 PreviewLightDirection
     )
     {
         DiffuseColor = Vector3.zero;
@@ -61,7 +62,19 @@ public class AdditionalLightsLambertNode : CodeFunctionNode
         SpecularColor = specularColor;
     }";
     public static string PreviewShader = @"{
-        DiffuseColor = half3(0, 0, 0);
-        SpecularColor = half3(0, 0, 0);
+        //DiffuseColor = LightingLambert(half3(0.2, 0.2, 0.3), PreviewLightDirection, WorldNormal);
+        DiffuseColor = saturate(dot(WorldNormal, PreviewLightDirection)) * half3(0.2, 0.2, 0.3);
+        //half4 glossColor = half4(1,1,1,Glossiness);
+        //SpecularColor = LightingSpecular(half3(0.2, 0.2, 0.3), PreviewLightDirection, WorldNormal, normalize(half3(0,1,0)), glossColor, Shininess);
+        //SpecularColor = half3(0,0,0);
+        //DiffuseColor = half3(0,0,0);
+
+
+        half3 halfVec = SafeNormalize(PreviewLightDirection + normalize(WorldView));
+        half NdotH = saturate(dot(WorldNormal, halfVec));
+        half modifier = pow(NdotH, Shininess) * Glossiness;
+        SpecularColor = modifier * half3(0.2, 0.2, 0.3);
+        //half3 specularReflection = specularGloss.rgb * modifier;
+        //return lightColor * specularReflection;
     }";
 }
