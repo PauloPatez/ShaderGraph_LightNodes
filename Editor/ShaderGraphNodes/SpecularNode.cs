@@ -25,8 +25,8 @@ public class SpecularNode : CodeFunctionNode
     [Slot(1, Binding.None)] Vector3 AttenuatedLightColor,
     [Slot(2, Binding.WorldSpaceNormal)] Vector3 WorldNormal,
     [Slot(3, Binding.WorldSpaceViewDirection)] Vector3 WorldView,
-    [Slot(4, Binding.None)] Vector1 Glossiness,
-    [Slot(5, Binding.None)] Vector1 Shininess,
+    [Slot(4, Binding.None, 4f, 0f, 0f, 0f)] Vector1 Glossiness,
+    [Slot(5, Binding.None, 40f, 0f, 0f, 0f)] Vector1 Shininess,
     [Slot(6, Binding.None)] out Vector3 OutputColor
     )
     {
